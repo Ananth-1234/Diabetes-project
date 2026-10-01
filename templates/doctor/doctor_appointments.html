@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Doctor Appointments - DiaCare</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --fg-primary: #0f172a;
+            --fg-secondary: #475569;
+            --fg-muted: #94a3b8;
+            --accent-primary: #0d9488;
+            --accent-secondary: #14b8a6;
+            --accent-glow: rgba(13, 148, 136, 0.15);
+            --border-color: rgba(226, 232, 240, 1);
+            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--fg-primary);
+            min-height: 100vh;
+        }
+
+        /* Background */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(13, 148, 136, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--fg-primary) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--fg-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Main Content */
+        main {
+            position: relative;
+            z-index: 10;
+            padding: 8rem 2rem 4rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            margin-bottom: 3rem;
+            animation: fadeSlideUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .header-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-primary), #0891b2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 8px 20px var(--accent-glow);
+        }
+
+        .header-subtitle {
+            color: var(--fg-secondary);
+            margin-top: 0.5rem;
+            margin-left: 66px; /* Align with title text */
+        }
+
+        /* Appointment List */
+        .appointment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* Appointment Card */
+        .appointment-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            animation: fadeSlideUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .appointment-card:nth-child(1) { animation-delay: 0.1s; }
+        .appointment-card:nth-child(2) { animation-delay: 0.15s; }
+        .appointment-card:nth-child(3) { animation-delay: 0.2s; }
+        .appointment-card:nth-child(4) { animation-delay: 0.25s; }
+
+        .appointment-card:hover {
+            border-color: rgba(13, 148, 136, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Card Top Section */
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .patient-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .patient-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--bg-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--fg-muted);
+        }
+
+        .patient-details h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .patient-details p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--fg-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #b45309;
+        }
+
+        .status-accepted {
+            background: rgba(16, 185, 129, 0.15);
+            color: #047857;
+        }
+
+        .status-completed {
+            background: rgba(59, 130, 246, 0.15);
+            color: #1d4ed8;
+        }
+
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.15);
+            color: #b91c1c;
+        }
+
+        /* Card Actions */
+        .card-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-accept {
+            background: rgba(16, 185, 129, 0.1);
+            color: #047857;
+        }
+        .btn-accept:hover {
+            background: #047857;
+            color: white;
+        }
+
+        .btn-reject {
+            background: rgba(239, 68, 68, 0.1);
+            color: #b91c1c;
+        }
+        .btn-reject:hover {
+            background: #b91c1c;
+            color: white;
+        }
+
+        .btn-complete {
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--accent-primary);
+        }
+        .btn-complete:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-notes {
+            background: rgba(59, 130, 246, 0.1);
+            color: #1d4ed8;
+        }
+        .btn-notes:hover {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1px dashed var(--border-color);
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--bg-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--fg-muted);
+        }
+
+        .empty-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-text {
+            color: var(--fg-secondary);
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            main {
+                padding: 7rem 1rem 2rem;
+            }
+            .card-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-subtitle {
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+            .appointment-card {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background -->
+    <div class="bg-pattern"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="/">
+                <span class="brand-icon">
+                    <i data-lucide="activity" style="width: 24px; height: 24px; color: white;"></i>
+                </span>
+                DiaCare
+            </a>
+            
+            <div class="navbar-right">
+                <a href="{{ url_for('doctor_dashboard') }}" class="btn-back">
+                    <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                    Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Header -->
+        <div class="page-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="header-icon">
+                    <i data-lucide="calendar-check" style="width: 28px; height: 28px;"></i>
+                </div>
+                <div>
+                    <h1 class="header-title mb-0">Appointments</h1>
+                </div>
+            </div>
+            <p class="header-subtitle">Manage your upcoming patient consultations</p>
+        </div>
+
+        <!-- Appointment List -->
+        {% if appointments %}
+        <div class="appointment-list">
+            {% for appointment in appointments %}
+            
+            <div class="appointment-card">
+                <div class="card-top">
+                    <!-- Patient Info -->
+                    <div class="patient-info">
+                        <div class="patient-avatar">
+                            <i data-lucide="user" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div class="patient-details">
+                            <h3>{{ appointment.patient_name }}</h3>
+                            <p>
+                                <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                                {{ appointment.date }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Status Badge -->
+                    <span class="status-badge 
+                        {% if appointment.status == 'Pending' %}status-pending
+                        {% elif appointment.status == 'Accepted' %}status-accepted
+                        {% elif appointment.status == 'Completed' %}status-completed
+                        {% elif appointment.status == 'Rejected' %}status-rejected
+                        {% endif %}">
+                        {{ appointment.status }}
+                    </span>
+                </div>
+
+                <!-- Conditional Actions -->
+                <div class="card-actions">
+                    {% if appointment.status == "Pending" %}
+                        <a href="{{ url_for('update_appointment', id=appointment.id, action='accept') }}" class="action-btn btn-accept">
+                            <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+                            Accept
+                        </a>
+                        <a href="{{ url_for('update_appointment', id=appointment.id, action='reject') }}" class="action-btn btn-reject">
+                            <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                            Reject
+                        </a>
+                    
+                    {% elif appointment.status == "Accepted" %}
+                        <a href="{{ url_for('complete_appointment', id=appointment.id) }}" class="action-btn btn-complete">
+                            <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+                            Mark Completed
+                        </a>
+                    
+                    {% elif appointment.status == "Completed" %}
+                        <a href="{{ url_for('add_notes', id=appointment.id) }}" class="action-btn btn-notes">
+                            <i data-lucide="file-text" style="width: 16px; height: 16px;"></i>
+                            View/Add Notes
+                        </a>
+                    {% else %}
+                        <span class="text-muted small">No actions available</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% endfor %}
+        </div>
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i data-lucide="calendar-x" style="width: 36px; height: 36px;"></i>
+                </div>
+                <h2 class="empty-title">No Appointments Found</h2>
+                <p class="empty-text">You currently have no scheduled appointments. They will appear here once booked by patients.</p>
+            </div>
+        {% endif %}
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

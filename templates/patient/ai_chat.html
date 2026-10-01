@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>AI Chat - DiaCare</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --fg-primary: #0f172a;
+            --fg-secondary: #475569;
+            --fg-muted: #94a3b8;
+            --accent-primary: #0d9488;
+            --accent-secondary: #14b8a6;
+            --accent-glow: rgba(13, 148, 136, 0.15);
+            --border-color: rgba(226, 232, 240, 1);
+            --card-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--fg-primary);
+            min-height: 100vh;
+            height: 100vh; /* Full height for chat layout */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        /* Background Pattern */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(13, 148, 136, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--fg-primary) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--fg-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Main Chat Area */
+        main {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 7rem 1rem 1rem; /* Top padding for navbar */
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Chat Card */
+        .chat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeSlideUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Messages Container */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Chat Bubbles */
+        .message-row {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            max-width: 85%;
+        }
+
+        .message-row.bot {
+            align-self: flex-start;
+        }
+
+        .message-row.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .bot .avatar {
+            background: linear-gradient(135deg, var(--accent-primary), #0891b2);
+            color: white;
+            box-shadow: 0 4px 10px var(--accent-glow);
+        }
+
+        .message-bubble {
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .bot .message-bubble {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--fg-secondary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .welcome-bubble {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .welcome-bubble h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--fg-primary);
+        }
+
+        .welcome-bubble p {
+            color: var(--fg-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Input Area */
+        .input-area {
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .input-form {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1;
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            background: var(--bg-primary);
+            color: var(--fg-primary);
+            resize: none;
+            transition: all 0.3s ease;
+            min-height: 56px;
+            max-height: 150px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .btn-send {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-primary), #0891b2);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--accent-glow);
+            flex-shrink: 0;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .message-row {
+                max-width: 95%;
+            }
+            .navbar {
+                padding: 1rem;
+            }
+            main {
+                padding: 6rem 0.5rem 0.5rem;
+            }
+            .chat-card {
+                border-radius: 0; /* Full width on mobile */
+                border: none;
+                border-top: 1px solid var(--border-color);
+            }
+            .input-area {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background -->
+    <div class="bg-pattern"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="/">
+                <span class="brand-icon">
+                    <i data-lucide="activity" style="width: 24px; height: 24px; color: white;"></i>
+                </span>
+                DiaCare
+            </a>
+            
+            <div class="navbar-right">
+                <a href="{{ url_for('patient_dashboard') }}" class="btn-back">
+                    <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                    Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <div class="chat-card">
+            
+            <!-- Messages Area -->
+            <div class="messages-container" id="chatWindow">
+                
+                <!-- Welcome Message -->
+                <div class="welcome-bubble">
+                    <h3>AI Diabetes Assistant</h3>
+                    <p>Ask anything about diabetes, symptoms, diet, or lifestyle tips.</p>
+                </div>
+
+                <!-- AI Response Logic -->
+                {% if response %}
+                <!-- Displaying the User's question would require passing it back in context, 
+                     so we display the AI response directly here as the latest message. -->
+                
+                <div class="message-row bot">
+                    <div class="avatar">
+                        <i data-lucide="bot" style="width: 20px; height: 20px;"></i>
+                    </div>
+                    <div class="message-bubble">
+                        {{ response }}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <form method="POST" class="input-form">
+                    <div class="input-group">
+                        <textarea name="message" class="form-control" rows="1" placeholder="Type your question here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-send">
+                        <i data-lucide="send" style="width: 24px; height: 24px;"></i>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Auto-scroll to bottom if there is a response
+        const chatWindow = document.getElementById('chatWindow');
+        if (chatWindow) {
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        // Auto-resize textarea
+        const textarea = document.querySelector('textarea');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    </script>
+</body>
+</html>

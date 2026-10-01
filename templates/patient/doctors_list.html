@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Available Doctors - DiaCare</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --fg-primary: #0f172a;
+            --fg-secondary: #475569;
+            --fg-muted: #94a3b8;
+            --accent-primary: #0d9488;
+            --accent-secondary: #14b8a6;
+            --accent-glow: rgba(13, 148, 136, 0.15);
+            --border-color: rgba(226, 232, 240, 1);
+            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--fg-primary);
+            min-height: 100vh;
+        }
+
+        /* Background */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(13, 148, 136, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--fg-primary) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--fg-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Main Content */
+        main {
+            position: relative;
+            z-index: 10;
+            padding: 8rem 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            margin-bottom: 3rem;
+            animation: fadeSlideUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .header-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-primary), #0891b2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 8px 20px var(--accent-glow);
+        }
+
+        .header-subtitle {
+            color: var(--fg-secondary);
+            margin-top: 0.5rem;
+            margin-left: 66px;
+        }
+
+        /* Doctors Grid */
+        .doctors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Doctor Card */
+        .doctor-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            animation: fadeSlideUp 0.6s ease forwards;
+            opacity: 0;
+            position: relative;
+        }
+
+        .doctor-card:nth-child(1) { animation-delay: 0.1s; }
+        .doctor-card:nth-child(2) { animation-delay: 0.15s; }
+        .doctor-card:nth-child(3) { animation-delay: 0.2s; }
+        .doctor-card:nth-child(4) { animation-delay: 0.25s; }
+        .doctor-card:nth-child(5) { animation-delay: 0.3s; }
+        .doctor-card:nth-child(6) { animation-delay: 0.35s; }
+
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(13, 148, 136, 0.3);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.05), rgba(6, 182, 212, 0.02));
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .doctor-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent-primary), #0891b2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: 0 4px 10px var(--accent-glow);
+        }
+
+        .doctor-title {
+            flex: 1;
+        }
+
+        .doctor-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--fg-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .doctor-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            background: rgba(13, 148, 136, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+        }
+
+        .card-body-custom {
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--fg-secondary);
+            font-size: 0.95rem;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--fg-muted);
+        }
+
+        .card-footer-custom {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background: rgba(248, 250, 252, 0.5);
+        }
+
+        .btn-book {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, var(--accent-primary), #0891b2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px var(--accent-glow);
+        }
+
+        .btn-book:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--accent-glow);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1px dashed var(--border-color);
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            main {
+                padding: 7rem 1rem 2rem;
+            }
+            .header-subtitle {
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background -->
+    <div class="bg-pattern"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="/">
+                <span class="brand-icon">
+                    <i data-lucide="activity" style="width: 24px; height: 24px; color: white;"></i>
+                </span>
+                DiaCare
+            </a>
+            
+            <div class="navbar-right">
+                <a href="{{ url_for('patient_dashboard') }}" class="btn-back">
+                    <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                    Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Header -->
+        <div class="page-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="header-icon">
+                    <i data-lucide="users" style="width: 28px; height: 28px;"></i>
+                </div>
+                <div>
+                    <h1 class="header-title mb-0">Available Doctors</h1>
+                </div>
+            </div>
+            <p class="header-subtitle">Select a specialist to book your consultation</p>
+        </div>
+
+        <!-- Doctors Grid -->
+        {% if doctors %}
+        <div class="doctors-grid">
+            {% for doctor in doctors %}
+            
+            <div class="doctor-card">
+                <!-- Card Header -->
+                <div class="card-header-custom">
+                    <div class="doctor-avatar">
+                        <!-- Display First Letter of Name -->
+                        {{ doctor.name[0] }}
+                    </div>
+                    <div class="doctor-title">
+                        <h3 class="doctor-name">Dr. {{ doctor.name }}</h3>
+                        <span class="doctor-badge">
+                            <i data-lucide="verified" style="width: 12px; height: 12px;"></i>
+                            Verified Professional
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body-custom">
+                    <div class="info-row">
+                        <div class="info-icon">
+                            <i data-lucide="stethoscope" style="width: 18px; height: 18px;"></i>
+                        </div>
+                        <div>
+                            <strong>Specialization:</strong><br>
+                            {{ doctor.specialization }}
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-icon">
+                            <i data-lucide="briefcase" style="width: 18px; height: 18px;"></i>
+                        </div>
+                        <div>
+                            <strong>Experience:</strong><br>
+                            {{ doctor.experience }} Years
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="card-footer-custom">
+                    <a href="{{ url_for('book_appointment', doctor_id=doctor.id) }}" class="btn-book">
+                        <i data-lucide="calendar-plus" style="width: 18px; height: 18px;"></i>
+                        Book Appointment
+                    </a>
+                </div>
+            </div>
+
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="empty-state">
+                <div style="width: 60px; height: 60px; background: var(--bg-primary); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="user-x" style="width: 28px; height: 28px; color: var(--fg-muted);"></i>
+                </div>
+                <h3 style="font-weight: 700; margin-bottom: 0.5rem;">No Doctors Available</h3>
+                <p style="color: var(--fg-secondary);">There are currently no doctors registered in the system.</p>
+            </div>
+        {% endif %}
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
